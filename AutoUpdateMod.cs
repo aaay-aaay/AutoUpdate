@@ -9,6 +9,7 @@ using Partiality.Modloader;
 using RWCustom;
 using Steamworks;
 using UnityEngine;
+using BepInEx;
 
 /*
 EXAMPLE:
@@ -40,42 +41,51 @@ namespace PastebinMachine.AutoUpdate
 		// Token: 0x06000003 RID: 3 RVA: 0x00002078 File Offset: 0x00000278
 		public void Initialize()
 		{
-			foreach (PartialityMod partialityMod in PartialityManager.Instance.modManager.loadedMods)
+            List<Mod> mods = new List<Mod>();
+            /*
+			foreach (Mod partialityMod in PartialityManager.Instance.modManager.loadedMods)
 			{
-				Debug.Log("Checking " + partialityMod);
-				FieldInfo field = partialityMod.GetType().GetField("updateURL");
-				FieldInfo field2 = partialityMod.GetType().GetField("version");
-				FieldInfo field3 = partialityMod.GetType().GetField("keyE");
-				FieldInfo field4 = partialityMod.GetType().GetField("keyN");
+                mods.append(new Mod(partialityMod, partialityMod.identifier));
+            }
+            */
+            if (PartialityExists()) AddMods(mods);
+            if (BepinexExists()) AddBepinexPlugins(mods);
+            foreach (Mod mod in mods)
+            {
+				Debug.Log("Checking " + mod.identifier);
+				FieldInfo field = mod.modObj.GetType().GetField("updateURL");
+				FieldInfo field2 = mod.modObj.GetType().GetField("version");
+				FieldInfo field3 = mod.modObj.GetType().GetField("keyE");
+				FieldInfo field4 = mod.modObj.GetType().GetField("keyN");
 				if (field == null && field2 == null && field3 == null && field4 == null)
 				{
-					Debug.Log(partialityMod.ModID + " does not support AutoUpdate.");
+					Debug.Log(mod.identifier + " does not support AutoUpdate.");
 				}
 				else if (field == null || field2 == null || field3 == null || field4 == null)
 				{
-					Debug.LogError("Cannot update " + partialityMod.ModID + ", one or more required fields are missing.");
+					Debug.LogError("Cannot update " + mod.identifier + ", one or more required fields are missing.");
 				}
 				else if (field.FieldType != typeof(string) || field2.FieldType != typeof(int) || field3.FieldType != typeof(string) || field4.FieldType != typeof(string))
 				{
-					Debug.LogError("Cannot update " + partialityMod.ModID + ", one or more fields have the incorrect type.");
+					Debug.LogError("Cannot update " + mod.identifier + ", one or more fields have the incorrect type.");
 				}
 				else
 				{
 					RSAParameters value = default(RSAParameters);
-					value.Exponent = Convert.FromBase64String((string)field3.GetValue(partialityMod));
-					value.Modulus = Convert.FromBase64String((string)field4.GetValue(partialityMod));
-					this.modKeys[partialityMod.ModID] = value;
-					this.scripts.Add(new GameObject("AutoUpdateMod_" + partialityMod.ModID).AddComponent<AutoUpdateScript>().Initialize(this, partialityMod, (string)field.GetValue(partialityMod), (int)field2.GetValue(partialityMod)));
+					value.Exponent = Convert.FromBase64String((string)field3.GetValue(mod.modObj));
+					value.Modulus = Convert.FromBase64String((string)field4.GetValue(mod.modObj));
+					this.modKeys[mod.identifier] = value;
+					this.scripts.Add(new GameObject("AutoUpdateMod_" + mod.identifier).AddComponent<AutoUpdateScript>().Initialize(this, mod, (string)field.GetValue(mod.modObj), (int)field2.GetValue(mod.modObj)));
 				}
                 
                 try
                 {
-                    byte[] data = File.ReadAllBytes(partialityMod.GetType().Assembly.Location);
+                    byte[] data = File.ReadAllBytes(mod.modObj.GetType().Assembly.Location);
                     using (SHA512 shaM = new SHA512Managed())
                     {
-                        string hash = Convert.ToBase64String(shaM.ComputeHash(File.ReadAllBytes(partialityMod.GetType().Assembly.Location)));
+                        string hash = Convert.ToBase64String(shaM.ComputeHash(File.ReadAllBytes(mod.modObj.GetType().Assembly.Location)));
                         Debug.Log("Got hash: " + hash);
-                        hashes[hash] = partialityMod;
+                        hashes[hash] = mod;
                     }
                 }
                 catch
@@ -84,13 +94,46 @@ namespace PastebinMachine.AutoUpdate
 			}
             new GameObject("AutoUpdateHashChecker").AddComponent<AutoUpdateHashDownloader>().Initialize(this);
 		}
+        
+        public bool PartialityExists()
+        {
+            return true; // this is a partiality mod so partiality probably exists
+        }
+        
+        public void AddMods(List<Mod> mods)
+        {
+			foreach (PartialityMod partialityMod in PartialityManager.Instance.modManager.loadedMods)
+			{
+                mods.Add(new Mod(partialityMod, "partiality:" + partialityMod.ModID));
+            }
+        }
+        
+        public bool BepinexExists()
+        {
+            foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                if (asm.GetName().Name == "BepInEx")
+                {
+                    return true; // close enough
+                }
+            }
+            return false;
+        }
+        
+        public void AddBepinexPlugins(List<Mod> mods)
+        {
+            foreach (BaseUnityPlugin bepinPlugin in UnityEngine.Object.FindObjectsOfType<BaseUnityPlugin>())
+            {
+                mods.Add(new Mod(bepinPlugin, "bepinex:" + bepinPlugin.Info.Metadata.GUID));
+            }
+        }
 
 		// Token: 0x06000004 RID: 4 RVA: 0x000022BC File Offset: 0x000004BC
-		public void ProcessResult(PartialityMod amod, string text, int version)
+		public void ProcessResult(Mod amod, string text, int version)
 		{
-			Debug.Log("loading json " + text + " for mod " + amod.ModID);
+			Debug.Log("loading json " + text + " for mod " + amod.identifier);
 			Dictionary<string, object> dictionary = text.dictionaryFromJson();
-			Debug.Log("loaded json " + text + " for mod " + amod.ModID);
+			Debug.Log("loaded json " + text + " for mod " + amod.identifier);
 			Debug.Log(string.Concat(new object[]
 			{
 				"version is ",
@@ -98,16 +141,16 @@ namespace PastebinMachine.AutoUpdate
 				" of type ",
 				dictionary["version"].GetType()
 			}));
-			this.modSigs[amod.ModID] = Convert.FromBase64String((string)dictionary["sig"]);
-			this.modURLs[amod.ModID] = (string)dictionary["url"];
+			this.modSigs[amod.identifier] = Convert.FromBase64String((string)dictionary["sig"]);
+			this.modURLs[amod.identifier] = (string)dictionary["url"];
 			if ((int)((long)dictionary["version"]) > version)
 			{
-				Debug.Log("Update required for " + amod.ModID);
+				Debug.Log("Update required for " + amod.identifier);
 				this.needUpdate.Add(amod);
 			}
 			else
 			{
-				Debug.Log("No update required for " + amod.ModID);
+				Debug.Log("No update required for " + amod.identifier);
 			}
 			if (this.scripts.Count == 0)
 			{
@@ -120,9 +163,9 @@ namespace PastebinMachine.AutoUpdate
 				if (this.needUpdate.Count != 0)
 				{
 					Directory.CreateDirectory(Custom.RootFolderDirectory() + "UpdatedMods");
-					foreach (PartialityMod partialityMod in this.needUpdate)
+					foreach (Mod partialityMod in this.needUpdate)
 					{
-						new GameObject("Download_" + partialityMod.ModID).AddComponent<DownloadScript>().Initialize(this, partialityMod, Custom.RootFolderDirectory() + "UpdatedMods", this.modURLs[partialityMod.ModID], Path.GetFileName(partialityMod.GetType().Assembly.Location));
+						new GameObject("Download_" + partialityMod.identifier).AddComponent<DownloadScript>().Initialize(this, partialityMod, Custom.RootFolderDirectory() + "UpdatedMods", this.modURLs[partialityMod.identifier], Path.GetFileName(partialityMod.modObj.GetType().Assembly.Location));
 					}
 					if (this.needUpdate.Count == 0)
 					{
@@ -140,15 +183,10 @@ namespace PastebinMachine.AutoUpdate
             foreach (object obj in list)
             {
                 Dictionary<string, object> asDict = obj as Dictionary<string, object>;
-                Debug.Log("...");
                 string hash = (string)(asDict["hash"]);
-                Debug.Log("hash...");
                 int key = (int)(long)(asDict["key"]);
-                Debug.Log("key...");
                 int mod = (int)(long)(asDict["mod"]);
-                Debug.Log("mod...");
                 string sig = (string)(asDict["sig"]);
-                Debug.Log("sig!");
                 if (hashes.ContainsKey(hash)) new GameObject("DownloadKeyForHash_" + (i++)).AddComponent<DownloadHashKeyScript>().Initialize(this, hash, key, mod, sig);
             }
         }
@@ -162,21 +200,21 @@ namespace PastebinMachine.AutoUpdate
             byte[] sigData = Convert.FromBase64String(sig);
             string signedData = "audbhash-" + hash + "-" + keyE + "-" + keyN + "-" + key + "-" + mod;
             RSACryptoServiceProvider rsacryptoServiceProvider = new RSACryptoServiceProvider();
-            rsacryptoServiceProvider.ImportParameters(this.modKeys[this.ModID]);
+            rsacryptoServiceProvider.ImportParameters(this.modKeys["partiality:" + this.ModID]);
             if (!rsacryptoServiceProvider.VerifyData(Encoding.ASCII.GetBytes(signedData), "SHA512", sigData))
             {
                 Debug.LogError("INVALID HASH SIGNATURE! " + hash);
                 return;
             }
-            PartialityMod partialityMod = hashes[hash];
+            Mod partialityMod = hashes[hash];
             
             RSAParameters rsaParams = default(RSAParameters);
             rsaParams.Exponent = Convert.FromBase64String(keyE);
             rsaParams.Modulus = Convert.FromBase64String(keyN);
-            this.modKeys[partialityMod.ModID] = rsaParams;
+            this.modKeys[partialityMod.identifier] = rsaParams;
             
-            this.scripts.Add(new GameObject("AutoUpdateMod_" + partialityMod.ModID).AddComponent<AutoUpdateScript>().Initialize(this, partialityMod, "http://beestuff.pythonanywhere.com/audb/api/mods/" + key + "/" + mod, -1));
-            // new GameObject("Download_" + partialityMod.ModID).AddComponent<DownloadScript>().Initialize(this, mod, Custom.RootFolderDirectory() + "UpdatedMods", "http://beestuff.pythonanywhere.com/audb/api/mods/", Path.GetFileName(partialityMod.GetType().Assembly.Location));
+            this.scripts.Add(new GameObject("AutoUpdateMod_" + partialityMod.identifier).AddComponent<AutoUpdateScript>().Initialize(this, partialityMod, "http://beestuff.pythonanywhere.com/audb/api/mods/" + key + "/" + mod, -1));
+            // new GameObject("Download_" + partialityMod.identifier).AddComponent<DownloadScript>().Initialize(this, mod, Custom.RootFolderDirectory() + "UpdatedMods", "http://beestuff.pythonanywhere.com/audb/api/mods/", Path.GetFileName(partialityMod.GetType().Assembly.Location));
         }
 
 		// Token: 0x06000005 RID: 5 RVA: 0x000028C8 File Offset: 0x00000AC8
@@ -261,10 +299,10 @@ namespace PastebinMachine.AutoUpdate
         }
 
 		// Token: 0x04000001 RID: 1
-		public string updateURL = "http://beestuff.pythonanywhere.com/audb/api/mods/0/0";
+		public string updateURL = "https://beestuff.pythonanywhere.com/audb/api/mods/0/0";
 
 		// Token: 0x04000002 RID: 2
-		public int version = 13;
+		public int version = 15;
 
 		// Token: 0x04000003 RID: 3
 		public string keyE = "AQAB";
@@ -276,13 +314,13 @@ namespace PastebinMachine.AutoUpdate
 		public List<AutoUpdateScript> scripts = new List<AutoUpdateScript>();
 
 		// Token: 0x04000006 RID: 6
-		public List<PartialityMod> needUpdate = new List<PartialityMod>();
+		public List<Mod> needUpdate = new List<Mod>();
 
 		// Token: 0x04000007 RID: 7
-		public List<PartialityMod> needRename = new List<PartialityMod>();
+		public List<Mod> needRename = new List<Mod>();
 
 		// Token: 0x04000008 RID: 8
-		public Dictionary<PartialityMod, string> newNames = new Dictionary<PartialityMod, string>();
+		public Dictionary<Mod, string> newNames = new Dictionary<Mod, string>();
 
 		// Token: 0x0400000A RID: 10
 		public bool actuallyUpdated = false;
@@ -302,6 +340,6 @@ namespace PastebinMachine.AutoUpdate
 		// Token: 0x0400000F RID: 15
 		public Dictionary<string, string> modURLs = new Dictionary<string, string>();
         
-        public Dictionary<string, PartialityMod> hashes = new Dictionary<string, PartialityMod>();
+        public Dictionary<string, Mod> hashes = new Dictionary<string, Mod>();
 	}
 }

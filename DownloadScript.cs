@@ -9,7 +9,7 @@ namespace PastebinMachine.AutoUpdate
 	public class DownloadScript : MonoBehaviour
 	{
 		// Token: 0x0600000C RID: 12 RVA: 0x00002BE8 File Offset: 0x00000DE8
-		public void Initialize(AutoUpdateMod au, PartialityMod mod, string path, string url, string filename)
+		public void Initialize(AutoUpdateMod au, Mod mod, string path, string url, string filename)
 		{
 			this.au = au;
 			this.mod = mod;
@@ -26,13 +26,13 @@ namespace PastebinMachine.AutoUpdate
 			if (this.ready && this.www.isDone)
 			{
 				this.ready = false;
-				if (this.au.VerifySignature(this.mod.ModID, this.www.bytes))
+				if (this.au.VerifySignature(this.mod.identifier, this.www.bytes))
 				{
 					File.WriteAllBytes(this.path, this.www.bytes);
 				}
 				else
 				{
-					Debug.LogError(this.mod.ModID + " UPDATE HAS INCORRECT SIGNATURE!");
+					Debug.LogError(this.mod.identifier + " UPDATE HAS INCORRECT SIGNATURE!");
 				}
 				lock (this.au.otherLockObj)
 				{
@@ -54,7 +54,7 @@ namespace PastebinMachine.AutoUpdate
 		public AutoUpdateMod au;
 
 		// Token: 0x04000018 RID: 24
-		public PartialityMod mod;
+		public Mod mod;
 
 		// Token: 0x04000019 RID: 25
 		public string path;

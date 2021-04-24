@@ -8,7 +8,7 @@ namespace PastebinMachine.AutoUpdate
 	public class AutoUpdateScript : MonoBehaviour
 	{
 		// Token: 0x06000009 RID: 9 RVA: 0x00002AC8 File Offset: 0x00000CC8
-		public AutoUpdateScript Initialize(AutoUpdateMod au, PartialityMod mod, string url, int version)
+		public AutoUpdateScript Initialize(AutoUpdateMod au, Mod mod, string url, int version)
 		{
 			this.au = au;
 			this.mod = mod;
@@ -39,7 +39,7 @@ namespace PastebinMachine.AutoUpdate
 		public AutoUpdateMod au;
 
 		// Token: 0x04000011 RID: 17
-		public PartialityMod mod;
+		public Mod mod;
 
 		// Token: 0x04000012 RID: 18
 		public WWW www;
