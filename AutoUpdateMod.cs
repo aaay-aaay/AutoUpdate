@@ -266,10 +266,11 @@ namespace PastebinMachine.AutoUpdate
 				System.Diagnostics.ProcessStartInfo processStartInfo = new System.Diagnostics.ProcessStartInfo("cmd.exe");
 				/*processStartInfo.Arguments*/ string procArgs = string.Concat(new string[]
 				{
-					"/c xcopy /Y UpdatedMods \"",
+					"/c (xcopy /Y /R UpdatedMods \"",
                     DirectoryToLoadModsFrom(),
 					"\" && rd /S /Q UpdatedMods && start ",
-                    GetLaunchCommand()
+                    GetLaunchCommand(),
+                    ") || (echo \"Something went wrong\" && pause)"
 				});
                 Debug.Log(procArgs);
                 processStartInfo.Arguments = procArgs;
@@ -304,7 +305,7 @@ namespace PastebinMachine.AutoUpdate
 		public string updateURL = "https://beestuff.pythonanywhere.com/audb/api/mods/0/0";
 
 		// Token: 0x04000002 RID: 2
-		public int version = 16;
+		public int version = 17;
 
 		// Token: 0x04000003 RID: 3
 		public string keyE = "AQAB";
