@@ -302,10 +302,10 @@ namespace PastebinMachine.AutoUpdate
         }
 
 		// Token: 0x04000001 RID: 1
-		public string updateURL = "https://beestuff.pythonanywhere.com/audb/api/mods/0/0";
+		public string updateURL = "http://beestuff.pythonanywhere.com/audb/api/mods/0/0";
 
 		// Token: 0x04000002 RID: 2
-		public int version = 17;
+		public int version = 18;
 
 		// Token: 0x04000003 RID: 3
 		public string keyE = "AQAB";
