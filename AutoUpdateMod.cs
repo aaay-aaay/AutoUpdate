@@ -30,6 +30,7 @@ namespace PastebinMachine.AutoUpdate
 		public override void Init()
 		{
 			this.ModID = "Auto Update";
+            this.Version = this.version.ToString();
 		}
 
 		// Token: 0x06000002 RID: 2 RVA: 0x0000205E File Offset: 0x0000025E
@@ -305,7 +306,7 @@ namespace PastebinMachine.AutoUpdate
 		public string updateURL = "http://beestuff.pythonanywhere.com/audb/api/mods/0/0";
 
 		// Token: 0x04000002 RID: 2
-		public int version = 18;
+		public int version = 19;
 
 		// Token: 0x04000003 RID: 3
 		public string keyE = "AQAB";
