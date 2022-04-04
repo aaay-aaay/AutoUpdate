@@ -23,23 +23,19 @@ EXAMPLE:
 
 namespace PastebinMachine.AutoUpdate
 {
-    // Token: 0x02000002 RID: 2
     public class AutoUpdateMod : PartialityMod
     {
-        // Token: 0x06000001 RID: 1 RVA: 0x00002050 File Offset: 0x00000250
         public override void Init()
         {
             this.ModID = "Auto Update";
             this.Version = this.version.ToString();
         }
 
-        // Token: 0x06000002 RID: 2 RVA: 0x0000205E File Offset: 0x0000025E
         public override void OnLoad()
         {
             new GameObject("AutoUpdate").AddComponent<InitializerScript>().Initialize(this);
         }
 
-        // Token: 0x06000003 RID: 3 RVA: 0x00002078 File Offset: 0x00000278
         public void Initialize()
         {
             List<Mod> mods = new List<Mod>();
@@ -129,7 +125,6 @@ namespace PastebinMachine.AutoUpdate
             }
         }
 
-        // Token: 0x06000004 RID: 4 RVA: 0x000022BC File Offset: 0x000004BC
         public void ProcessResult(Mod amod, string text, int version)
         {
             Debug.Log("loading json " + text + " for mod " + amod.identifier);
@@ -218,7 +213,6 @@ namespace PastebinMachine.AutoUpdate
             // new GameObject("Download_" + partialityMod.identifier).AddComponent<DownloadScript>().Initialize(this, mod, Custom.RootFolderDirectory() + "UpdatedMods", "http://beestuff.pythonanywhere.com/audb/api/mods/", Path.GetFileName(partialityMod.GetType().Assembly.Location));
         }
 
-        // Token: 0x06000005 RID: 5 RVA: 0x000028C8 File Offset: 0x00000AC8
         public bool VerifySignature(string modid, byte[] data)
         {
             RSACryptoServiceProvider rsacryptoServiceProvider = new RSACryptoServiceProvider();
@@ -233,7 +227,6 @@ namespace PastebinMachine.AutoUpdate
             return rsacryptoServiceProvider.VerifyData(data, "SHA512", this.modSigs[modid]);
         }
 
-        // Token: 0x06000006 RID: 6 RVA: 0x00002944 File Offset: 0x00000B44
         public string GetAppID()
         {
             throw new Exception();
@@ -257,7 +250,6 @@ namespace PastebinMachine.AutoUpdate
             }
         }
 
-        // Token: 0x06000007 RID: 7 RVA: 0x0000297C File Offset: 0x00000B7C
         public void Done()
         {
             Debug.Log("Calling Done()");
@@ -302,46 +294,32 @@ namespace PastebinMachine.AutoUpdate
             return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
 
-        // Token: 0x04000001 RID: 1
         public string updateURL = "http://beestuff.pythonanywhere.com/audb/api/mods/0/0";
 
-        // Token: 0x04000002 RID: 2
         public int version = 19;
 
-        // Token: 0x04000003 RID: 3
         public string keyE = "AQAB";
 
-        // Token: 0x04000004 RID: 4
         public string keyN = "yu7XMmICrzuavyZRGWoknFIbJX4N4zh3mFPOyfzmQkil2axVIyWx5ogCdQ3OTdSZ0xpQ3yiZ7zqbguLu+UWZMfLOBKQZOs52A9OyzeYm7iMALmcLWo6OdndcMc1Uc4ZdVtK1CRoPeUVUhdBfk2xwjx+CvZUlQZ26N1MZVV0nq54IOEJzC9qQnVNgeeHxO1lRUTdg5ZyYb7I2BhHfpDWyTvUp6d5m6+HPKoalC4OZSfmIjRAi5UVDXNRWn05zeT+3BJ2GbKttwvoEa6zrkVuFfOOe9eOAWO3thXmq9vJLeF36xCYbUJMkGR2M5kDySfvoC7pzbzyZ204rXYpxxXyWPP5CaaZFP93iprZXlSO3XfIWwws+R1QHB6bv5chKxTZmy/Imo4M3kNLo5B2NR/ZPWbJqjew3ytj0A+2j/RVwV9CIwPlN4P50uwFm+Mr0OF2GZ6vU0s/WM7rE78+8Wwbgcw6rTReKhVezkCCtOdPkBIOYv3qmLK2S71NPN2ulhMHD9oj4t0uidgz8pNGtmygHAm45m2zeJOhs5Q/YDsTv5P7xD19yfVcn5uHpSzRIJwH5/DU1+aiSAIRMpwhF4XTUw73+pBujdghZdbdqe2CL1juw7XCa+XfJNtsUYrg+jPaCEUsbMuNxdFbvS0Jleiu3C8KPNKDQaZ7QQMnEJXeusdU=";
 
-        // Token: 0x04000005 RID: 5
         public List<AutoUpdateScript> scripts = new List<AutoUpdateScript>();
 
-        // Token: 0x04000006 RID: 6
         public List<Mod> needUpdate = new List<Mod>();
 
-        // Token: 0x04000007 RID: 7
         public List<Mod> needRename = new List<Mod>();
 
-        // Token: 0x04000008 RID: 8
         public Dictionary<Mod, string> newNames = new Dictionary<Mod, string>();
 
-        // Token: 0x0400000A RID: 10
         public bool actuallyUpdated = false;
 
-        // Token: 0x0400000B RID: 11
         public object lockObj = new object();
 
-        // Token: 0x0400000C RID: 12
         public object otherLockObj = new object();
 
-        // Token: 0x0400000D RID: 13
         public Dictionary<string, RSAParameters> modKeys = new Dictionary<string, RSAParameters>();
 
-        // Token: 0x0400000E RID: 14
         public Dictionary<string, byte[]> modSigs = new Dictionary<string, byte[]>();
 
-        // Token: 0x0400000F RID: 15
         public Dictionary<string, string> modURLs = new Dictionary<string, string>();
         
         public Dictionary<string, Mod> hashes = new Dictionary<string, Mod>();
