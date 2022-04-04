@@ -50,29 +50,29 @@ namespace PastebinMachine.AutoUpdate
             foreach (Mod mod in mods)
             {
                 Debug.Log("Checking " + mod.identifier);
-                FieldInfo field = mod.modObj.GetType().GetField("updateURL");
-                FieldInfo field2 = mod.modObj.GetType().GetField("version");
-                FieldInfo field3 = mod.modObj.GetType().GetField("keyE");
-                FieldInfo field4 = mod.modObj.GetType().GetField("keyN");
-                if (field == null && field2 == null && field3 == null && field4 == null)
+                FieldInfo updateURL = mod.modObj.GetType().GetField("updateURL");
+                FieldInfo version = mod.modObj.GetType().GetField("version");
+                FieldInfo keyE = mod.modObj.GetType().GetField("keyE");
+                FieldInfo keyN = mod.modObj.GetType().GetField("keyN");
+                if (updateURL == null && version == null && keyE == null && keyN == null)
                 {
                     Debug.Log(mod.identifier + " does not support AutoUpdate.");
                 }
-                else if (field == null || field2 == null || field3 == null || field4 == null)
+                else if (updateURL == null || version == null || keyE == null || keyN == null)
                 {
                     Debug.LogError("Cannot update " + mod.identifier + ", one or more required fields are missing.");
                 }
-                else if (field.FieldType != typeof(string) || field2.FieldType != typeof(int) || field3.FieldType != typeof(string) || field4.FieldType != typeof(string))
+                else if (updateURL.FieldType != typeof(string) || version.FieldType != typeof(int) || keyE.FieldType != typeof(string) || keyN.FieldType != typeof(string))
                 {
                     Debug.LogError("Cannot update " + mod.identifier + ", one or more fields have the incorrect type.");
                 }
                 else
                 {
                     RSAParameters value = default(RSAParameters);
-                    value.Exponent = Convert.FromBase64String((string)field3.GetValue(mod.modObj));
-                    value.Modulus = Convert.FromBase64String((string)field4.GetValue(mod.modObj));
+                    value.Exponent = Convert.FromBase64String((string)keyE.GetValue(mod.modObj));
+                    value.Modulus = Convert.FromBase64String((string)keyN.GetValue(mod.modObj));
                     this.modKeys[mod.identifier] = value;
-                    this.scripts.Add(new GameObject("AutoUpdateMod_" + mod.identifier).AddComponent<AutoUpdateScript>().Initialize(this, mod, (string)field.GetValue(mod.modObj), (int)field2.GetValue(mod.modObj)));
+                    this.scripts.Add(new GameObject("AutoUpdateMod_" + mod.identifier).AddComponent<AutoUpdateScript>().Initialize(this, mod, (string)updateURL.GetValue(mod.modObj), (int)version.GetValue(mod.modObj)));
                 }
 
                 try
@@ -215,8 +215,8 @@ namespace PastebinMachine.AutoUpdate
 
         public bool VerifySignature(string modid, byte[] data)
         {
-            RSACryptoServiceProvider rsacryptoServiceProvider = new RSACryptoServiceProvider();
-            rsacryptoServiceProvider.ImportParameters(this.modKeys[modid]);
+            RSACryptoServiceProvider rsaCsp = new RSACryptoServiceProvider();
+            rsaCsp.ImportParameters(this.modKeys[modid]);
             Debug.Log(string.Concat(new object[]
             {
                 "Verifying signature ",
@@ -224,7 +224,7 @@ namespace PastebinMachine.AutoUpdate
                 " for mod ",
                 modid
             }));
-            return rsacryptoServiceProvider.VerifyData(data, "SHA512", this.modSigs[modid]);
+            return rsaCsp.VerifyData(data, "SHA512", this.modSigs[modid]);
         }
 
         public string GetAppID()
