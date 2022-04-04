@@ -9,7 +9,7 @@ namespace PastebinMachine.AutoUpdate
             this.modObj = modObj;
             this.identifier = identifier;
         }
-        
+
         public object modObj;
         public string identifier;
     }

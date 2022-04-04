@@ -74,7 +74,7 @@ namespace PastebinMachine.AutoUpdate
                     this.modKeys[mod.identifier] = value;
                     this.scripts.Add(new GameObject("AutoUpdateMod_" + mod.identifier).AddComponent<AutoUpdateScript>().Initialize(this, mod, (string)field.GetValue(mod.modObj), (int)field2.GetValue(mod.modObj)));
                 }
-                
+
                 try
                 {
                     byte[] data = File.ReadAllBytes(mod.modObj.GetType().Assembly.Location);
@@ -91,12 +91,12 @@ namespace PastebinMachine.AutoUpdate
             }
             new GameObject("AutoUpdateHashChecker").AddComponent<AutoUpdateHashDownloader>().Initialize(this);
         }
-        
+
         public bool PartialityExists()
         {
             return true; // this is a partiality mod so partiality probably exists
         }
-        
+
         public void AddMods(List<Mod> mods)
         {
             foreach (PartialityMod partialityMod in PartialityManager.Instance.modManager.loadedMods)
@@ -104,7 +104,7 @@ namespace PastebinMachine.AutoUpdate
                 mods.Add(new Mod(partialityMod, "partiality:" + partialityMod.ModID));
             }
         }
-        
+
         public bool BepinexExists()
         {
             foreach (Assembly asm in AppDomain.CurrentDomain.GetAssemblies())
@@ -116,7 +116,7 @@ namespace PastebinMachine.AutoUpdate
             }
             return false;
         }
-        
+
         public void AddBepinexPlugins(List<Mod> mods)
         {
             foreach (BaseUnityPlugin bepinPlugin in UnityEngine.Object.FindObjectsOfType<BaseUnityPlugin>())
@@ -170,7 +170,7 @@ namespace PastebinMachine.AutoUpdate
                 }
             }
         }
-        
+
         public void ProcessHashes(string text)
         {
             Debug.Log("loading hash json " + text);
@@ -186,13 +186,13 @@ namespace PastebinMachine.AutoUpdate
                 if (hashes.ContainsKey(hash)) new GameObject("DownloadKeyForHash_" + (i++)).AddComponent<DownloadHashKeyScript>().Initialize(this, hash, key, mod, sig);
             }
         }
-        
+
         public void ProcessKeyData(string text, string hash, int key, int mod, string sig)
         {
             Dictionary<string, object> obj = text.dictionaryFromJson();
             string keyE = (string)obj["e"];
             string keyN = (string)obj["n"];
-            
+
             byte[] sigData = Convert.FromBase64String(sig);
             string signedData = "audbhash-" + hash + "-" + keyE + "-" + keyN + "-" + key + "-" + mod;
             RSACryptoServiceProvider rsacryptoServiceProvider = new RSACryptoServiceProvider();
@@ -203,12 +203,12 @@ namespace PastebinMachine.AutoUpdate
                 return;
             }
             Mod partialityMod = hashes[hash];
-            
+
             RSAParameters rsaParams = default(RSAParameters);
             rsaParams.Exponent = Convert.FromBase64String(keyE);
             rsaParams.Modulus = Convert.FromBase64String(keyN);
             this.modKeys[partialityMod.identifier] = rsaParams;
-            
+
             this.scripts.Add(new GameObject("AutoUpdateMod_" + partialityMod.identifier).AddComponent<AutoUpdateScript>().Initialize(this, partialityMod, "http://beestuff.pythonanywhere.com/audb/api/mods/" + key + "/" + mod, -1));
             // new GameObject("Download_" + partialityMod.identifier).AddComponent<DownloadScript>().Initialize(this, mod, Custom.RootFolderDirectory() + "UpdatedMods", "http://beestuff.pythonanywhere.com/audb/api/mods/", Path.GetFileName(partialityMod.GetType().Assembly.Location));
         }
@@ -236,7 +236,7 @@ namespace PastebinMachine.AutoUpdate
             return text;
             */
         }
-        
+
         public string GetLaunchCommand()
         {
             try
@@ -288,7 +288,7 @@ namespace PastebinMachine.AutoUpdate
             }
             */
         }
-        
+
         public string DirectoryToLoadModsFrom()
         {
             return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -321,7 +321,7 @@ namespace PastebinMachine.AutoUpdate
         public Dictionary<string, byte[]> modSigs = new Dictionary<string, byte[]>();
 
         public Dictionary<string, string> modURLs = new Dictionary<string, string>();
-        
+
         public Dictionary<string, Mod> hashes = new Dictionary<string, Mod>();
     }
 }

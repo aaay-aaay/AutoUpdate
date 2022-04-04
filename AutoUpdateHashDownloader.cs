@@ -12,7 +12,7 @@ namespace PastebinMachine.AutoUpdate
             this.www = new WWW("http://beestuff.pythonanywhere.com/audb/api/hashes");
             this.ready = true;
         }
-        
+
         public void Update()
         {
             if (this.ready && this.www.isDone)
@@ -26,7 +26,7 @@ namespace PastebinMachine.AutoUpdate
                 }
             }
         }
-        
+
         public AutoUpdateMod au;
         public WWW www;
         public bool ready;

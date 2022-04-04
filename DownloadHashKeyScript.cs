@@ -16,7 +16,7 @@ namespace PastebinMachine.AutoUpdate
             this.mod = mod;
             this.sig = sig;
         }
-        
+
         public void Update()
         {
             if (this.ready && this.www.isDone)
@@ -30,7 +30,7 @@ namespace PastebinMachine.AutoUpdate
                 }
             }
         }
-        
+
         public AutoUpdateMod au;
         public WWW www;
         public bool ready;
