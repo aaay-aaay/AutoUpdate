@@ -31,18 +31,15 @@ namespace PastebinMachine.AutoUpdate
                 {
                     Debug.LogError(this.mod.identifier + " UPDATE HAS INCORRECT SIGNATURE!");
                 }
-                lock (this.au.otherLockObj)
+                if (File.Exists(this.path))
                 {
-                    if (File.Exists(this.path))
-                    {
-                        this.au.actuallyUpdated = true;
-                    }
-                    this.au.needUpdate.Remove(this.mod);
-                    if (this.au.needUpdate.Count == 0)
-                    {
-                        Debug.Log("Calling Done");
-                        this.au.Done();
-                    }
+                    this.au.actuallyUpdated = true;
+                }
+                this.au.needUpdate.Remove(this.mod);
+                if (this.au.needUpdate.Count == 0)
+                {
+                    Debug.Log("Calling Done");
+                    this.au.Done();
                 }
             }
         }

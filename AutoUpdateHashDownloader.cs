@@ -20,10 +20,7 @@ namespace PastebinMachine.AutoUpdate
                 this.ready = false;
                 this.done = true;
                 this.text = this.www.text;
-                lock (this.au.lockObj)
-                {
-                    this.au.ProcessHashes(this.text);
-                }
+                this.au.ProcessHashes(this.text);
             }
         }
 

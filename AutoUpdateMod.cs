@@ -312,10 +312,6 @@ namespace PastebinMachine.AutoUpdate
 
         public bool actuallyUpdated = false;
 
-        public object lockObj = new object();
-
-        public object otherLockObj = new object();
-
         public Dictionary<string, RSAParameters> modKeys = new Dictionary<string, RSAParameters>();
 
         public Dictionary<string, byte[]> modSigs = new Dictionary<string, byte[]>();

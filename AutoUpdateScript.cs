@@ -24,11 +24,8 @@ namespace PastebinMachine.AutoUpdate
                 this.ready = false;
                 this.text = this.www.text;
                 this.done = true;
-                lock (this.au.lockObj)
-                {
-                    this.au.scripts.Remove(this);
-                    this.au.ProcessResult(this.mod, this.text, this.version);
-                }
+                this.au.scripts.Remove(this);
+                this.au.ProcessResult(this.mod, this.text, this.version);
             }
         }
 
