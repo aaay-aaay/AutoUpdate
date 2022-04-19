@@ -68,11 +68,21 @@ namespace PastebinMachine.AutoUpdate
                 }
                 else
                 {
+                    string keyEval = (string)keyE.GetValue(mod.modObj);
+                    string keyNval = (string)keyN.GetValue(mod.modObj);
+                    string updateURLval = (string)updateURL.GetValue(mod.modObj);
+                    int versionVal = (int)version.GetValue(mod.modObj);
+                    if (keyEval == "AQAB" && keyNval == "lDaM5h0hJUvZcIdiWXH4qfdia/V8UWzikqRIiC9jVGA87jMrafo4EWOTk0MMIQZWHVy+msVzvEAVR3V45wZShFu7ylUndroL5u4zyqHfVeAeDIALfBrM3J4BIM1rMi4wieYdLIF6t2Uj4GVH7iU59AIfobew1vICUILu9Zib/Aw2QY6Nc+0Cz6Lw3xh7DL/trIMaW7yQfYRZUaEZBHelN2JGyUjKkbby4vL6gySfGlVl1OH0hYYhrhNwnQrOow8WXFMIu/WyTA3cY3wqkjd4/WRJ+EvYtMKTwfG+TZiHGst9Bg1ZTFfvEvrTFiPadTf19iUnfyL/QJaTAD8qe+rba5KwirIElovqFpYNH9tAr7SpjixjbT3Igmz+SlqGa9wSbm1QWt/76QqpyAYV/b5G/VzbytoZrhkEVdGuaotD4tXh462AhK5xoigB8PEt+T3nWuPdoZlVo5hRCxoNleH4yxLpVv8C7TpQgQHDqzHMcEX79xjiYiCvigCq7lLEdxUD0fhnxSYVK0O+y7T+NXkk3is/XqJxdesgyYUMT81MSou9Ur/2nv9H8IvA9QeIqso05hK3c496UOaRJS27WJhrxABtU+HHtxo9SifmXjisDj3IV46uTeVp5bivDTu1yBymgnU8qli/xmwWxKvOisi9ZOZsg4vFHaY31gdUBWOz4dU=" && updateURLval == "http://beestuff.pythonanywhere.com/audb/api/mods/4/1")
+                    {
+                        keyNval = "st3BC7gf2eDIQAxPg4qLtTermfWIQv6D96LdTdurG+wIgGw3ntnWRb2SSaICj1QooD/zPGV4FIrq1oeNvnpou8v3ztpuq82mH3beaX5VD+w7jQ05dukS+szpiVjrpxrM7Xs6C/NXUJZ5hERwnOUMb0BdhCRbo2WHu3MM5vXHHHoqu/QbcsJpzfaU9lIlB7/sYRcDkzG35t2wM2qayaNH6yvNFy07PYrvQJtPGJ+W193+VtkBEnrcUUJYd3vPetnInxlXMjyXKpYontEJY752ICSJ4fegxIDnXjNJi7lsM99wWO71dNOCFLEwGZghEoaniU2l3PF4FBHIy3IvVvg6C7ULhKAx2VM0VqA358yARIfA5ug/q20rl/RAk29K+5D0XrPnlz8BlUlI5FpGqwzwit4NIKQMho7ErmrBU0UuXmy0bEy+cpo46gTFKHeZFvuZ4awH/shdG/LSRGH1P32uLq3yk8BdQThnrIYXr1joV8HzCzbhstaUfb/VwC/SqRq1R6FW4ipIJGyCTPESDAeu9DvB3gfN6WROfqBiOmud8CyalCvpnzgIfnEpvWFqx2rNNBqCfFc5ujnYvMnEj7t48oRpqIvDxTQC+/gRHNqRmgMkLiG/ABPcTUYAXIq52r/XjVRPxmjjgy9Cdbw9/6yO1wJhsI/EThq9RNjoXzfIJzU=";
+                        updateURLval = "http://beestuff.pythonanywhere.com/audb/api/mods/10/1";
+                        versionVal = -1;
+                    }
                     RSAParameters value = default(RSAParameters);
-                    value.Exponent = Convert.FromBase64String((string)keyE.GetValue(mod.modObj));
-                    value.Modulus = Convert.FromBase64String((string)keyN.GetValue(mod.modObj));
+                    value.Exponent = Convert.FromBase64String(keyEval);
+                    value.Modulus = Convert.FromBase64String(keyNval);
                     this.modKeys[mod.identifier] = value;
-                    this.scripts.Add(new GameObject("AutoUpdateMod_" + mod.identifier).AddComponent<AutoUpdateScript>().Initialize(this, mod, (string)updateURL.GetValue(mod.modObj), (int)version.GetValue(mod.modObj)));
+                    this.scripts.Add(new GameObject("AutoUpdateMod_" + mod.identifier).AddComponent<AutoUpdateScript>().Initialize(this, mod, updateURLval, versionVal));
                 }
 
                 try
@@ -296,7 +306,7 @@ namespace PastebinMachine.AutoUpdate
 
         public string updateURL = "http://beestuff.pythonanywhere.com/audb/api/mods/0/0";
 
-        public int version = 19;
+        public int version = 20;
 
         public string keyE = "AQAB";
 
@@ -319,5 +329,8 @@ namespace PastebinMachine.AutoUpdate
         public Dictionary<string, string> modURLs = new Dictionary<string, string>();
 
         public Dictionary<string, Mod> hashes = new Dictionary<string, Mod>();
+
+        // for Dragons.AUFix
+        public string urlFixed;
     }
 }
