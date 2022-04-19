@@ -38,6 +38,13 @@ namespace PastebinMachine.AutoUpdate
 
         public void Initialize()
         {
+            bool enabled = true;
+            if (File.Exists(Custom.RootFolderDirectory() + "audisable.txt"))
+            {
+                Debug.Log("AU disabled");
+                Debug.LogError("AU disabled");
+                enabled = false;
+            }
             List<Mod> mods = new List<Mod>();
             /*
             foreach (Mod partialityMod in PartialityManager.Instance.modManager.loadedMods)
@@ -82,7 +89,10 @@ namespace PastebinMachine.AutoUpdate
                     value.Exponent = Convert.FromBase64String(keyEval);
                     value.Modulus = Convert.FromBase64String(keyNval);
                     this.modKeys[mod.identifier] = value;
-                    this.scripts.Add(new GameObject("AutoUpdateMod_" + mod.identifier).AddComponent<AutoUpdateScript>().Initialize(this, mod, updateURLval, versionVal));
+                    if (enabled)
+                    {
+                        this.scripts.Add(new GameObject("AutoUpdateMod_" + mod.identifier).AddComponent<AutoUpdateScript>().Initialize(this, mod, updateURLval, versionVal));
+                    }
                 }
 
                 try
@@ -99,7 +109,10 @@ namespace PastebinMachine.AutoUpdate
                 {
                 }
             }
-            new GameObject("AutoUpdateHashChecker").AddComponent<AutoUpdateHashDownloader>().Initialize(this);
+            if (enabled)
+            {
+                new GameObject("AutoUpdateHashChecker").AddComponent<AutoUpdateHashDownloader>().Initialize(this);
+            }
         }
 
         public bool PartialityExists()
@@ -306,7 +319,7 @@ namespace PastebinMachine.AutoUpdate
 
         public string updateURL = "http://beestuff.pythonanywhere.com/audb/api/mods/0/0";
 
-        public int version = 20;
+        public int version = 21;
 
         public string keyE = "AQAB";
 
