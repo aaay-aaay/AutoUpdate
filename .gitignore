@@ -1,0 +1,8 @@
+# vs project files
+*.sln
+*.csproj
+bin/
+obj/
+refs/
+.vs/
+*csproj.user
