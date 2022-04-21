@@ -7,9 +7,10 @@ using System.Text;
 using Partiality;
 using Partiality.Modloader;
 using RWCustom;
-using Steamworks;
+//using Steamworks;
 using UnityEngine;
 using BepInEx;
+using System.Linq;
 
 /*
 EXAMPLE:
@@ -45,6 +46,23 @@ namespace PastebinMachine.AutoUpdate
                 Debug.LogError("AU disabled");
                 enabled = false;
             }
+
+            //excluding specific mods from updating
+            string[] blacklist = default;
+            var blf = new FileInfo(Path.Combine(Custom.RootFolderDirectory(), "AUBL.txt"));
+            if (blf.Exists)
+            {
+                using (var cts = blf.OpenText())
+                {
+                    var names = cts.ReadToEnd().Split('\n');
+                    blacklist = names;
+                }
+            }
+            blacklist = blacklist ?? new string[0];
+            Debug.Log("Update blacklist: ");
+            foreach (var entry in blacklist) Debug.Log(entry);
+            Debug.Log("End update blacklist");
+
             List<Mod> mods = new List<Mod>();
             /*
             foreach (Mod partialityMod in PartialityManager.Instance.modManager.loadedMods)
@@ -57,6 +75,7 @@ namespace PastebinMachine.AutoUpdate
             foreach (Mod mod in mods)
             {
                 Debug.Log("Checking " + mod.identifier);
+                
                 FieldInfo updateURL = mod.modObj.GetType().GetField("updateURL");
                 FieldInfo version = mod.modObj.GetType().GetField("version");
                 FieldInfo keyE = mod.modObj.GetType().GetField("keyE");
@@ -75,6 +94,11 @@ namespace PastebinMachine.AutoUpdate
                 }
                 else
                 {
+                    foreach (var sh in mod.shorthands) if (blacklist.Contains(sh))
+                        {
+                            Debug.Log($"Updates for {mod.identifier} are disabled locally; skipping");
+                            continue;
+                        }
                     string keyEval = (string)keyE.GetValue(mod.modObj);
                     string keyNval = (string)keyN.GetValue(mod.modObj);
                     string updateURLval = (string)updateURL.GetValue(mod.modObj);
@@ -105,8 +129,9 @@ namespace PastebinMachine.AutoUpdate
                         hashes[hash] = mod;
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    Debug.LogWarning($"Could not get hash: {e}");
                 }
             }
             if (enabled)
@@ -124,7 +149,7 @@ namespace PastebinMachine.AutoUpdate
         {
             foreach (PartialityMod partialityMod in PartialityManager.Instance.modManager.loadedMods)
             {
-                mods.Add(new Mod(partialityMod, "partiality:" + partialityMod.ModID));
+                mods.Add(new Mod(partialityMod, "partiality:" + partialityMod.ModID, partialityMod.ModID, partialityMod.GetType().Name));
             }
         }
 
@@ -144,7 +169,8 @@ namespace PastebinMachine.AutoUpdate
         {
             foreach (BaseUnityPlugin bepinPlugin in UnityEngine.Object.FindObjectsOfType<BaseUnityPlugin>())
             {
-                mods.Add(new Mod(bepinPlugin, "bepinex:" + bepinPlugin.Info.Metadata.GUID));
+                var guid = bepinPlugin.Info.Metadata.GUID;
+                mods.Add(new Mod(bepinPlugin, "bepinex:" + guid, guid, bepinPlugin.GetType().Name));
             }
         }
 
@@ -292,6 +318,17 @@ namespace PastebinMachine.AutoUpdate
                 processStartInfo.Arguments = procArgs;
                 processStartInfo.WorkingDirectory = Custom.RootFolderDirectory();
                 Debug.Log("Quitting");
+                try
+                {
+                    //make sure bep sees new files next launch
+                    var bepcache = new FileInfo(new[] { Custom.RootFolderDirectory(), "BepInEx", "cache", "chainloader_typeloader.dat" }.Aggregate(Path.Combine));
+                    if (bepcache.Exists) bepcache.Delete();
+                }
+                finally
+                {
+
+                }
+
                 System.Diagnostics.Process.Start(processStartInfo);
                 Application.Quit();
             }
