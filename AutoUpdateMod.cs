@@ -286,7 +286,7 @@ namespace PastebinMachine.AutoUpdate
                     DirectoryToLoadModsFrom(),
                     "\" && rd /S /Q UpdatedMods && start ",
                     GetLaunchCommand(),
-                    ") || (echo \"Something went wrong\" && pause)"
+                    ") || (echo \"Something went wrong. If you are using BOI, close it and then launch the game again. If not, ask bee#2660 in the Rain World discord discord.gg/rainworld in the #modding-support channel\" && pause)"
                 });
                 Debug.Log(procArgs);
                 processStartInfo.Arguments = procArgs;
@@ -319,7 +319,7 @@ namespace PastebinMachine.AutoUpdate
 
         public string updateURL = "http://beestuff.pythonanywhere.com/audb/api/mods/0/0";
 
-        public int version = 21;
+        public int version = 22;
 
         public string keyE = "AQAB";
 
